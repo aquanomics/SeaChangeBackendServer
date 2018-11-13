@@ -7,11 +7,12 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var mysql = require('mysql');
+var db = require('./components/db');
 
 var app = express();
 
-// view engine setup
+// VIEW ENGINE SETUP
+// ===============================================
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -24,49 +25,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-// MySql Connection Setup 
-//TODO: Use Hardcoded values for now. 
-var connection = mysql.createConnection({
-  host     : 'aa1l5mjgijg7vl8.csrllsyjmbto.ca-central-1.rds.amazonaws.com',
-  user     : 'DBMain',
-  password : 'PassCap28S3Change.,',
-  port     : '3306'
+// API ENDPOINT ROUTES
+// ===============================================
+app.get('/api/featurecollection', function (req, res) {
+  db.query('SELECT * FROM ebdb.FeatureCollection', function (err, rows, fields) {
+    if (!err) {
+      res.status(200).send({
+        FeatureCollection: rows,
+      });
+    } else {
+      console.log('Error while performing Query.');
+    }
+  });
 });
 
-// Connect to MySql db
-connection.connect(function(err) {
-  if (err) {
-    console.log(err.stack);  
-    return;
-  }
-  console.log('Connected to database.');
-});
-
-app.get('/db/disconnect', function(req, res) {  
-  connection.end();
+app.get('/db/disconnect', function (req, res) {
+  db.end();
   console.log('Disconnected to database.');
 });
 
-app.get('/api/featurecollection', function(req,res){
-  connection.query('SELECT * FROM ebdb.FeatureCollection', function(err, rows, fields) {
-        if (!err) {
-          res.status(200).send({
-            FeatureCollection: rows,
-          });  
-        } else {
-          console.log('Error while performing Query.');
-        }
-        });
-  });
 
-
+// ERROR HANDLERS
+// =============================================== 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
