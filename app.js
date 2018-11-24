@@ -39,6 +39,18 @@ app.get('/api/featurecollection', function (req, res) {
   });
 });
 
+app.get('/api/newsarticle', function (req, res) {
+  db.query('SELECT * FROM ebdb.NewsArticle', function (err, rows, fields) {
+    if (!err) {
+      res.status(200).send({
+        NewsArticle: rows,
+      });
+    } else {
+      console.log('Error while performing Query.');
+    }
+  });
+});
+
 app.get('/db/disconnect', function (req, res) {
   db.end();
   console.log('Disconnected to database.');
