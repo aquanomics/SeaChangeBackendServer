@@ -39,16 +39,35 @@ app.get('/api/featurecollection', function (req, res) {
   });
 });
 
+//app.get('/api/newsarticle', function (req, res) {
+//  db.query('SELECT * FROM ebdb.NewsArticle', function (err, rows, fields) {
+//    if (!err) {
+//      res.status(200).send({
+//        NewsArticle: rows,
+//      });
+//    } else {
+//      console.log('Error while performing Query.');
+//    }
+//  });
+//});
+
 app.get('/api/newsarticle', function (req, res) {
-  db.query('SELECT * FROM ebdb.NewsArticle', function (err, rows, fields) {
-    if (!err) {
-      res.status(200).send({
-        NewsArticle: rows,
-      });
-    } else {
-      console.log('Error while performing Query.');
+    if(req.query.category === undefined) {
+	res.status(500).send("parameter must be specified!");
+	return;
     }
-  });
+    
+    db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category+"'", function (err, rows, fields) {
+	if (!err) {
+	    res.status(200).send({
+		NewsArticle: rows,
+	    });
+	} else {
+	    console.log('Error while performing Query.');
+	}
+    });
+    
+    console.log('Processing /api/testing request');
 });
 
 app.get('/db/disconnect', function (req, res) {
