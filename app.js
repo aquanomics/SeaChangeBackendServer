@@ -63,9 +63,7 @@ app.get('/api/newsarticle', function (req, res) {
 
   db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category + "'", function (err, rows, fields) {
     if (!err) {
-      res.status(200).send({
-        NewsArticle: rows,
-      });
+      res.status(200).send({NewsArticle: rows,});
     } else {
       console.log('Error while performing Query.');
     }
@@ -77,7 +75,7 @@ app.get('/api/newsarticle', function (req, res) {
 app.get('/api/faoareas', function (req, res) {
   db.query('SELECT * FROM ebdb.FaoAreas', function (err, rows, fields) {
     if (!err) {
-      res.status(200).send(rows);
+      res.status(200).send({FaoAreas: rows,});
     } else {
       console.log('Error while performing Query.');
     }
@@ -87,7 +85,20 @@ app.get('/api/faoareas', function (req, res) {
 app.get('/api/species', function (req, res) {
   db.query('SELECT * FROM ebdb.Species', function (err, rows, fields) {
     if (!err) {
-      res.status(200).send(rows);
+      res.status(200).send({Species: rows,});
+    } else {
+      console.log('Error while performing Query.');
+    }
+  });
+});
+
+
+app.get('/api/listOfSpecies', function (req, res) {
+  db.query(`SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
+            FROM ebdb.FaoAreas AS fa
+            INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`, function (err, rows, fields) {
+    if (!err) {
+      res.status(200).send({List: rows,});
     } else {
       console.log('Error while performing Query.');
     }
