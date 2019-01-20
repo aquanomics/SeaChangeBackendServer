@@ -1,8 +1,8 @@
 // MYSQL DB CONNECTION SETUP
 // ===============================================
 
-var mysql = require('mysql');
-var connection_settings = require('../settings.json');
+const  mysql = require('mysql');
+const  connection_settings = require('../settings.json');
 var db;
 
 //Connect to MySql DB

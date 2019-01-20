@@ -1,19 +1,20 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
-var db = require('./components/db');
-var axios = require('./components/axios');
+const db = require('./components/db');
+const axios = require('./components/axios');
+const gmaps = require('./components/gmaps');
 
-var app = express();
+const app = express();
 
-var fishBaseFaoAreasUrl = "https://fishbase.ropensci.org/faoareas/?limit=5000&AreaCode=67";
-var fishBaseSpeciesUrl = "https://fishbase.ropensci.org/species/?limit=5000&offset=0";
+const fishBaseFaoAreasUrl = "https://fishbase.ropensci.org/faoareas/?limit=5000&AreaCode=67";
+const fishBaseSpeciesUrl = "https://fishbase.ropensci.org/species/?limit=5000&offset=0";
 
 // VIEW ENGINE SETUP
 // ===============================================
@@ -63,7 +64,7 @@ app.get('/api/newsarticle', function (req, res) {
 
   db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category + "'", function (err, rows, fields) {
     if (!err) {
-      res.status(200).send({NewsArticle: rows,});
+      res.status(200).send({ NewsArticle: rows, });
     } else {
       console.log('Error while performing Query.');
     }
@@ -75,7 +76,7 @@ app.get('/api/newsarticle', function (req, res) {
 app.get('/api/faoareas', function (req, res) {
   db.query('SELECT * FROM ebdb.FaoAreas', function (err, rows, fields) {
     if (!err) {
-      res.status(200).send({FaoAreas: rows,});
+      res.status(200).send({ FaoAreas: rows, });
     } else {
       console.log('Error while performing Query.');
     }
@@ -85,7 +86,7 @@ app.get('/api/faoareas', function (req, res) {
 app.get('/api/species', function (req, res) {
   db.query('SELECT * FROM ebdb.Species', function (err, rows, fields) {
     if (!err) {
-      res.status(200).send({Species: rows,});
+      res.status(200).send({ Species: rows, });
     } else {
       console.log('Error while performing Query.');
     }
@@ -97,8 +98,89 @@ app.get('/api/listOfSpecies', function (req, res) {
   db.query(`SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
             FROM ebdb.FaoAreas AS fa
             INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`, function (err, rows, fields) {
+      if (!err) {
+        res.status(200).send({ List: rows, });
+      } else {
+        console.log('Error while performing Query.');
+      }
+    });
+});
+
+
+//Note: Our SQL database is case insensitive for any string data
+//Input
+//search: string that has the search keywords
+app.get('/api/articleSearch', function (req, res) {
+  if (req.query.search === undefined) {
+   res.status(500).send("'search' parameter must be specified!");
+   return;
+  }
+
+  if (req.query.search == '') {
+   //send empty array so that nothing in the FlatList gets rendered
+   res.status(200).send({NewsArticle: [],});
+   return;
+  }
+
+  //NOTE: Still split on ' ' even though URL encoding represents space as '+'
+  //Express automatically recognizes the '+' as being ' '
+  var searchWordArr = req.query.search.split(' ');
+  var dbQueryCommand = "SELECT * FROM ebdb.NewsArticle";
+
+  //generate SQL command
+  for(var i = 0; i < searchWordArr.length; i++) {
+   if (i == 0)
+       dbQueryCommand += " WHERE";
+   else
+       dbQueryCommand += " AND";
+       
+   dbQueryCommand +=  ` title LIKE '%${searchWordArr[i]}%'`;
+  }
+
+  //send command to db
+  db.query(dbQueryCommand, function (err, rows, fields) {
+   if (!err) {
+       res.status(200).send({NewsArticle: rows,});
+   } else {
+       console.log('Error while performing Query.');
+       res.status(500).send(err);
+   }
+  });
+
+  console.log('Finished processing /api/articleSearch request');
+});
+
+// MAPS API ENDPOINT ROUTES
+// ===============================================
+
+app.get('/maps/geoCode', function (req, res) {
+   if (req.query.address === undefined) {
+     res.status(500).send("Address must be specified!");
+     return;
+   }
+
+  gmaps.getGeoCode(req.query.address,
+    function (response) {
+      res.status(200).send({ response });
+    },
+    function (errorMsg) {
+      res.status(500).send(errorMsg);
+    });
+});
+
+
+app.get('/maps/getNearbyArticles', function (req, res) {
+
+  if (req.query.lat == undefined || req.query.long == undefined 
+      || req.query.distance == undefined || req.query.limit == undefined) {
+    res.status(500).send("Missing Required Fields!");
+    return;
+  }
+
+  db.query('SELECT * FROM ebdb.NewsArticle', function (err, rows, fields) {
     if (!err) {
-      res.status(200).send({List: rows,});
+      var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
+      res.status(200).send({ result });
     } else {
       console.log('Error while performing Query.');
     }
@@ -162,7 +244,7 @@ app.get('/db/update/species', function (req, res) {
         jsonData[i].Author, jsonData[i].FBname, jsonData[i].PicPreferredName,
         jsonData[i].FamCode, jsonData[i].Subfamily, jsonData[i].GenCode,
         jsonData[i].BodyShapeI, jsonData[i].Source, jsonData[i].TaxIssue,
-        jsonData[i].Fresh, jsonData[i].Brack, jsonData[i].Saltwater, 
+        jsonData[i].Fresh, jsonData[i].Brack, jsonData[i].Saltwater,
         jsonData[i].DemersPelag, jsonData[i].Amphibious, jsonData[i].AnaCat,
         jsonData[i].MigratRef, jsonData[i].Vulnerability, jsonData[i].Length,
         jsonData[i].LTypeMaxM, jsonData[i].MaxLengthRef, jsonData[i].Weight,
@@ -218,31 +300,31 @@ app.get('/db/update/species', function (req, res) {
       res.status(500).send(errorMsg);
     });
 
-    });
+});
 
 
-  app.get('/db/disconnect', function (req, res) {
-    db.end();
-    console.log('Disconnected to database.');
-  });
+app.get('/db/disconnect', function (req, res) {
+  db.end();
+  console.log('Disconnected to database.');
+});
 
 
-  // ERROR HANDLERS
-  // =============================================== 
-  // catch 404 and forward to error handler
-  app.use(function (req, res, next) {
-    next(createError(404));
-  });
+// ERROR HANDLERS
+// =============================================== 
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  next(createError(404));
+});
 
-  // error handler
-  app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
-  });
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
 
-  module.exports = app;
+module.exports = app;
