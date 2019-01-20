@@ -1,12 +1,6 @@
 // GOOGLE MAPS FUNCTIONS
 // ===============================================
 
-const tempLocations = [{"location":'Loc1' ,"lat":49.192821,"long":-123.100860}, //close
-                       {"location":'Loc2' ,"lat":49.190745,"long":-123.104072}, //close
-                       {"location":'Loc3' ,"lat":49.195341,"long":-123.129779}, //Kinda far
-                       {"location":'Loc4' ,"lat":49.208458,"long":-122.970961}]; //Far
-                       
-
 const gMapsClient = require('@google/maps').createClient({
     // Key from Capstone28SeaChange@gmail.com',
     key: 'AIzaSyApEDBGybllN5dS2Q_8t81AQIImuBdRxIY',
@@ -23,7 +17,6 @@ module.exports.getGeoCode = function getGeoCode(location, onSuccess, onError) {
             onError(error);
         });
 };
-
 
 module.exports.getNearbyLocations = function getNearbyLocations(latitude, longitude, distance, limit, locations) {
     var lat = latitude;
