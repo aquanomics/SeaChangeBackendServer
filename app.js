@@ -11,6 +11,8 @@ const apiEndpoints = require('./endpoints/api');
 const mapEndpoints = require('./endpoints/map');
 const dbEndpoints = require('./endpoints/db');
 
+const authController = require('./auth/auth-controller');
+
 const app = express();
 
 // VIEW ENGINE SETUP
@@ -27,12 +29,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+// AUTH CONTROLLER 
+// ===============================================
+app.use('/api/auth', authController);
+
 // API ENDPOINTS SETUP
 // ===============================================
 app.use('/api', apiEndpoints);
 app.use('/map', mapEndpoints);
 app.use('/db', dbEndpoints);
-
 
 // ERROR HANDLERS
 // =============================================== 

@@ -2,14 +2,14 @@
 // ===============================================
 
 const  mysql = require('mysql');
-const  connection_settings = require('../settings.json');
+const  connection_settings = require('../config');
 var db;
 
 //Connect to MySql DB
 function connectDatabase() {
     if (!db) {
-        //TODO: Use Hardcoded in connection_settings.json values for now.
-        db = mysql.createConnection(connection_settings);
+        //TODO: Use Hardcoded in config values for now.
+        db = mysql.createConnection(connection_settings.db);
         db.connect(function (err) {
             if (err) {
                 console.log(err.stack);
