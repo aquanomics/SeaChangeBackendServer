@@ -42,7 +42,8 @@ router.get('/faoareas', function (req, res) {
         if (!err) {
             res.status(200).send({ FaoAreas: rows, });
         } else {
-            console.log('Error while performing Query.');
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
         }
     });
 });
@@ -53,20 +54,25 @@ router.get('/species', function (req, res) {
         if (!err) {
             res.status(200).send({ Species: rows, });
         } else {
-            console.log('Error while performing Query.');
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
         }
     });
 });
 
 /* GET A list of fish species NOTE: Currently only Area = 67 which is West coast of Canada */
 router.get('/listOfSpecies', function (req, res) {
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
     db.query(`SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
               FROM ebdb.FaoAreas AS fa
-              INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`, function (err, rows, fields) {
+              INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode LIMIT `+ limit +` OFFSET ` + offset, function (err, rows, fields) {
             if (!err) {
                 res.status(200).send({ List: rows, });
             } else {
-                console.log('Error while performing Query.');
+                console.log(err);
+                res.status(500).send('Error while performing query. Please check your Limit and Offset parameters');
             }
         });
 });
