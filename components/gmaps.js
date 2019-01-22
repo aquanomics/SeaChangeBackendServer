@@ -1,11 +1,8 @@
 // GOOGLE MAPS FUNCTIONS
 // ===============================================
 
-const gMapsClient = require('@google/maps').createClient({
-    // Key from Capstone28SeaChange@gmail.com',
-    key: 'AIzaSyApEDBGybllN5dS2Q_8t81AQIImuBdRxIY',
-    Promise: Promise
-});
+const connection_settings = require('../config');
+const gMapsClient = require('@google/maps').createClient(connection_settings.gmapsKey);
 
 module.exports.getGeoCode = function getGeoCode(location, onSuccess, onError) {
     gMapsClient.geocode({ address: location })

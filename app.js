@@ -10,6 +10,7 @@ const usersRouter = require('./routes/users');
 const apiEndpoints = require('./endpoints/api');
 const mapEndpoints = require('./endpoints/map');
 const dbEndpoints = require('./endpoints/db');
+const postImgEndpoints = require('./endpoints/post-img');
 
 const authController = require('./auth/auth-controller');
 
@@ -38,6 +39,7 @@ app.use('/api/auth', authController);
 app.use('/api', apiEndpoints);
 app.use('/map', mapEndpoints);
 app.use('/db', dbEndpoints);
+app.use('/post-img', postImgEndpoints);
 
 // ERROR HANDLERS
 // =============================================== 
