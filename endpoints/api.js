@@ -13,7 +13,8 @@ router.get('/featurecollection', function(req, res) {
             FeatureCollection: rows,
           });
         } else {
-          console.log('Error while performing Query.');
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
         }
       });
   });
@@ -21,15 +22,17 @@ router.get('/featurecollection', function(req, res) {
 /* GET News Article */
 router.get('/newsarticle', function (req, res) {
     if (req.query.category === undefined) {
-        res.status(500).send("parameter must be specified!");
+        res.status(500).send("Parameter category must be specified!");
         return;
     }
 
-    db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category + "'", function (err, rows, fields) {
+    db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category 
+        + "'" + "ORDER BY published_at DESC", function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ NewsArticle: rows, });
         } else {
-            console.log('Error while performing Query.');
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
         }
     });
 
@@ -75,6 +78,20 @@ router.get('/listOfSpecies', function (req, res) {
                 res.status(500).send('Error while performing query. Please check your Limit and Offset parameters');
             }
         });
+});
+
+
+/* GET Events */
+router.get('/events', function (req, res) {
+  
+    db.query('SELECT * FROM ebdb.Events ORDER BY startDate', function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ Events: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
 });
 
 
