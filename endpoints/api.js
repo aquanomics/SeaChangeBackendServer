@@ -26,8 +26,11 @@ router.get('/newsarticle', function (req, res) {
         return;
     }
 
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
     db.query("SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category 
-        + "'" + "ORDER BY published_at DESC", function (err, rows, fields) {
+        + "'" + "ORDER BY published_at DESC LIMIT "+ limit +" OFFSET " + offset, function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ NewsArticle: rows, });
         } else {
@@ -110,6 +113,9 @@ router.get('/articleSearch', function (req, res) {
         return;
     }
 
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
     //NOTE: Still split on ' ' even though URL encoding represents space as '+'
     //Express automatically recognizes the '+' as being ' '
     var searchWordArr = req.query.search.split(' ');
@@ -123,6 +129,7 @@ router.get('/articleSearch', function (req, res) {
             dbQueryCommand += " AND";
 
         dbQueryCommand += ` title LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += "ORDER BY published_at DESC LIMIT "+ limit +" OFFSET " + offset;
     }
 
     //send command to db
