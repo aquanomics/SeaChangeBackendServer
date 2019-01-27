@@ -12,9 +12,8 @@ const singleUpload = upload.single('image')
 // Need to find a way to get Node.js to parse form-data body format. 
 router.post('/image-upload', function(req, res) {
 
-  if (req.query.name == undefined || req.query.comment == undefined) 
-    return  res.status(500).send("Parameters or not specified properly");
-
+  if (req.query.name == undefined) return  res.status(500).send("Parameters or not specified properly");
+  
   singleUpload(req, res, function(err, some) {
     if (err || req.file == undefined) {
       return res.status(422).send({errors: [{title: 'Image Upload Error', detail: err.message}] });

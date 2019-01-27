@@ -21,10 +21,7 @@ router.get('/featurecollection', function(req, res) {
 
 /* GET News Article */
 router.get('/newsarticle', function (req, res) {
-    if (req.query.category === undefined) {
-        res.status(500).send("Parameter category must be specified!");
-        return;
-    }
+    if (req.query.category === undefined) return res.status(500).send("Parameter category must be specified!");
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
@@ -59,6 +56,20 @@ router.get('/species', function (req, res) {
     db.query('SELECT * FROM ebdb.Species', function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ Species: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
+});
+
+/* GET details info of a fish species */
+router.get('/speciesInfo', function (req, res) {
+    if (req.query.specCode === undefined) return res.status(500).send("Parameter specCode must be specified!");
+
+    db.query('SELECT * FROM ebdb.Species WHERE SpecCode = ' + req.query.specCode, function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ SpeciesInfo: rows, });
         } else {
             console.log(err);
             res.status(500).send('Error while performing Query.');
@@ -128,7 +139,7 @@ router.get('/articleSearch', function (req, res) {
         else
             dbQueryCommand += " AND";
 
-        dbQueryCommand += ` title LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` title LIKE '% ${searchWordArr[i]} %'`;
         dbQueryCommand += "ORDER BY published_at DESC LIMIT "+ limit +" OFFSET " + offset;
     }
 
