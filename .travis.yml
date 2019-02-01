@@ -1,0 +1,22 @@
+language: node_js
+sudo: false
+node_js:
+  "node"
+
+notifications:
+  email:
+    recipients:
+      - capstone28seachange@gmail.com
+    on_success: always
+    on_failure: always
+
+branches:
+  only:
+  - master
+  - develop
+
+after_success:
+- echo "Success"
+
+after_deploy:
+  - echo "done deploying"
