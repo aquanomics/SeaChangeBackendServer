@@ -15,11 +15,12 @@ const upload = multer({
       s3: s3,
       bucket: 's3-post-bucket',
       acl: 'public-read',
+      contentType: multerS3.AUTO_CONTENT_TYPE,
       metadata: function (req, file, cb) {
         cb(null, {fieldName: file.fieldname});
       },
       key: function (req, file, cb) {
-        cb(null, req.query.name + "-" + Date.now().toString())
+        cb(null, req.query.name + "-" + Date.now().toString() + ".png")
       }
     })
 });
