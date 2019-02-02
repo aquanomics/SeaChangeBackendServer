@@ -1,3 +1,5 @@
+// AUTH ENDPOINTS CONTROLLER
+// ===============================================
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -45,7 +47,9 @@ router.post('/login', function(req, res) {
             if(rows.length === 0) res.status(404).send('No user found.');
 
             var passwordIsValid = bcrypt.compareSync(req.body.password, rows[0].Password);
+
             if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
+
             var token = jwt.sign({ id: rows[0].id }, config.secret, {
               expiresIn: jwtTokenExpiration
             });

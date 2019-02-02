@@ -51,7 +51,7 @@ router.get('/faoareas', function (req, res) {
     });
 });
 
-/* GET All Fish Species */
+/* GET All Fish Species TODO: WILL BE REMOVE LATER*/
 router.get('/species', function (req, res) {
     db.query('SELECT * FROM ebdb.Species', function (err, rows, fields) {
         if (!err) {
@@ -109,6 +109,7 @@ router.get('/events', function (req, res) {
 });
 
 
+/* GET A list of articles that matches the search keywords */
 //Note: Our SQL database is case insensitive for any string data
 //Input
 //search: string that has the search keywords
@@ -152,8 +153,6 @@ router.get('/articleSearch', function (req, res) {
             res.status(500).send(err);
         }
     });
-
-    console.log('Finished processing /api/articleSearch request');
 });
 
 module.exports = router;
