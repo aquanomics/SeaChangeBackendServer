@@ -3,6 +3,8 @@ sudo: false
 node_js:
   "node"
 
+cache: npm
+
 notifications:
   email:
     recipients:
