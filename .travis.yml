@@ -17,8 +17,20 @@ branches:
   - master
   - develop
 
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key:
+    secure: "$AWS_SECRET_ACCESS_KEY"
+  region: $AWS_REGION 
+  app: "SeaChange"
+  env: "Seachange-env"
+  bucket_name: $AWS_EB_BUCKET_NAME
+  on:
+    branch: develop
+
 after_success:
-- echo "Success"
+- echo "Success!"
 
 after_deploy:
-  - echo "done deploying"
+  - echo "Finish deploying!"
