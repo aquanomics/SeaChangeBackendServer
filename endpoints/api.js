@@ -140,9 +140,9 @@ router.get('/articleSearch', function (req, res) {
         else
             dbQueryCommand += " AND";
 
-        dbQueryCommand += ` title LIKE '% ${searchWordArr[i]} %'`;
-        dbQueryCommand += "ORDER BY published_at DESC LIMIT "+ limit +" OFFSET " + offset;
+        dbQueryCommand += ` title LIKE '%${searchWordArr[i]}%'`;
     }
+    dbQueryCommand += " ORDER BY published_at DESC LIMIT "+ limit +" OFFSET " + offset;
 
     //send command to db
     db.query(dbQueryCommand, function (err, rows, fields) {
