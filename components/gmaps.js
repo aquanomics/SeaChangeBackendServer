@@ -31,7 +31,6 @@ module.exports.getNearbyLocations = function getNearbyLocations(latitude, longit
             Math.cos(toRadians(lat)) * Math.cos(toRadians(lat)) * Math.sin(dLong/2) * Math.sin(dLong/2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         var d = R * c;
-
         if(d <= distance) {
             locations[i].distance = d;
             nearbyLocations.push(locations[i]);

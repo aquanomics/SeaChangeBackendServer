@@ -37,6 +37,32 @@ chai.use(chaiHttp);
 });
 
 /*
+  * Test /GET Nearby Posts route
+  */
+ describe('/GET nearby posts', () => {
+    it('should GET the info of nearby posts based on the specified parameters from the DB', (done) => {
+      chai.request(app)
+          .get('/map/getNearbyPosts?lat=49.190077&long=-123.103008&distance=100&limit=5')
+          .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.result.should.be.a('array');
+            done();
+          });
+    });
+
+    it('should return error status 500 if any one of the parameter fields is not specified', (done) => {
+        chai.request(app)
+            .get('/map/getNearbyPosts?lat=49.190077&long=-123.103008&distance=100')
+            .end((err, res) => {
+                  res.should.have.status(500);
+                  expect(res.error.text).to.equal("Missing Required Fields!");
+              done();
+            });
+      });
+});
+
+/*
   * Test /GET  GeoCode route 
   */
  describe('/GET geocode', () => {
