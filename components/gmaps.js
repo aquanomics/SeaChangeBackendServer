@@ -23,7 +23,7 @@ module.exports.getNearbyLocations = function getNearbyLocations(latitude, longit
     var result = [];
     for(i=0; i  < locations.length; i++) {
         var mlat = locations[i].lat;
-        var mlong = locations[i].long;
+        var mlong = locations[i].lng;
         if(mlat == null || mlong == null) continue;
         var dLat  = toRadians(mlat - lat);
         var dLong = toRadians(mlong - long);
