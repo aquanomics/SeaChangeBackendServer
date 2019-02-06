@@ -20,9 +20,25 @@ const upload = multer({
         cb(null, {fieldName: file.fieldname});
       },
       key: function (req, file, cb) {
-        cb(null, req.query.name + "-" + Date.now().toString() + ".png")
+        cb(null, 'img-uploads/' + req.query.name + "-" + Date.now().toString() + ".png")
       }
     })
 });
-  
+
 module.exports = upload;
+  
+module.exports.deleteImg = function deleteImg(location, onSuccess, onError) {
+  var params = {
+    Bucket: connection_settings.aws_s3.bucket_name, 
+    Delete: { 
+      Objects: [ {Key: location }],
+    },
+  };
+  
+  s3.deleteObjects(params).promise()
+    .then(response => {
+      onSuccess(response);
+    }).catch(error => {
+      onError(error);
+    });
+};

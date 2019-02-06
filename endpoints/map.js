@@ -32,7 +32,8 @@ router.get('/geoCode', function (req, res) {
        var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
        res.status(200).send({ result });
      } else {
-       console.log('Error while performing Query.');
+       console.log(err);
+       res.status(500).send('Error while performing Query.');
      }
    });
  });
@@ -50,7 +51,8 @@ router.get('/geoCode', function (req, res) {
         var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
         res.status(200).send({ result });
       } else {
-        console.log('Error while performing Query.');
+        console.log(err);
+        res.status(500).send('Error while performing Query.');
       }
     });
   });
