@@ -19,7 +19,7 @@ router.post('/image-upload', function(req, res) {
       return res.status(422).send({errors: [{title: 'Image Upload Error', detail: err.message}] });
     }
 
-    db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, lng, urlToImage) VALUES (?, ?, ?, ?, ?)`,
+    db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, long, urlToImage) VALUES (?, ?, ?, ?, ?)`,
       [req.query.name, req.query.comment, req.query.lat, req.query.long, req.file.location], function (err, rows, fields) {
         if (!err) {
           return res.status(200).send({'imageUrl': req.file.location});
