@@ -86,8 +86,8 @@ router.get('/listOfSpecies', function (req, res) {
     db.query(`SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
               FROM ebdb.FaoAreas AS fa
               INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode 
-              WHERE fa.AreaCode = ?
-              LIMIT ? OFFSET ?`, [areaCode, limit, offset], function (err, rows, fields) {
+              WHERE fa.AreaCode = ?` +
+              " LIMIT " + limit + " OFFSET " + offset, [areaCode], function (err, rows, fields) {
             if (!err) {
                 res.status(200).send({ List: rows, });
             } else {
