@@ -46,7 +46,7 @@ router.get('/geoCode', function (req, res) {
       return res.status(500).send("Missing Required Fields!");
     }
   
-    db.query('SELECT * FROM ebdb.ImagePost', function (err, rows, fields) {
+    db.query('SELECT * FROM ebdb.ImagePost WHERE approved=1', function (err, rows, fields) {
       if (!err) {
         var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
         res.status(200).send({ result });

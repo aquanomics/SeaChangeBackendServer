@@ -20,7 +20,7 @@ router.post('/image-upload', function(req, res) {
     }
 
     db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, lng, urlToImage, imageKey) VALUES (?, ?, ?, ?, ?, ?)`,
-      [req.query.name, req.query.comment, req.query.lat, req.query.long, req.file.location, req.file.key], 
+      [req.query.name, req.query.comment, req.query.lat, req.query.lng, req.file.location, req.file.key], 
       function (err, rows, fields) {
         if (!err) {
           return res.status(200).send({'imageUrl': req.file.location, 'key': req.file.key});
@@ -33,7 +33,7 @@ router.post('/image-upload', function(req, res) {
 });
 
 
-/* DELETE existing image from the DB and S3 */
+/* DELETE an existing image from the DB and S3 */
 router.delete('/image-delete', function(req, res) {
 
   if (req.query.imageKey == undefined || req.query.imageKey == '') return  res.status(500).send("Image Key is not specified!");
@@ -55,5 +55,24 @@ router.delete('/image-delete', function(req, res) {
         res.status(500).send(errorMsg);
       }); 
 });
+
+
+/* PUT existing image approved to true  */
+router.put('/image-approve', function(req, res) {
+
+  if (req.query.imageKey == undefined || req.query.imageKey == '') return  res.status(500).send("Image Key is not specified!");
+
+  db.query('UPDATE ebdb.ImagePost SET approved=1 WHERE imageKey= ?', [req.query.imageKey], function (err, rows, fields) {
+    if (!err) {
+        console.log('Image updated to approved');
+        res.status(200).send('Image updated to approved');
+    } else {
+        console.log('Error while performing UPDATE');
+        res.status(500).send(err);
+    }
+  });
+});
+
+
 
 module.exports = router;
