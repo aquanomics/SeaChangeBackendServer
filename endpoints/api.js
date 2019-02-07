@@ -39,7 +39,7 @@ router.get('/newsarticle', function (req, res) {
     console.log('Processing /api/testing request');
 });
 
-/* GET FAO Areas NOTE: Currently only Area = 67 which is West coast of Canada */
+/* GET FAO Areas NOTE: Currently only Area = 67 and Area = 21 which is West and East coast of Canada */
 router.get('/faoareas', function (req, res) {
     db.query('SELECT * FROM ebdb.FaoAreas', function (err, rows, fields) {
         if (!err) {
@@ -77,21 +77,24 @@ router.get('/speciesInfo', function (req, res) {
     });
 });
 
-/* GET A list of fish species NOTE: Currently only Area = 67 which is West coast of Canada */
+/* GET A list of fish species NOTE: Currently only Area = 67 and Area = 21 which is West and East coast of Canada */
 router.get('/listOfSpecies', function (req, res) {
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+    var areaCode = (req.query.areaCode == undefined) ? 67 : req.query.areaCode;
 
     db.query(`SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
               FROM ebdb.FaoAreas AS fa
-              INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode LIMIT `+ limit +` OFFSET ` + offset, function (err, rows, fields) {
+              INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode 
+              WHERE fa.AreaCode = ?
+              LIMIT ? OFFSET ?`, [areaCode, limit, offset], function (err, rows, fields) {
             if (!err) {
                 res.status(200).send({ List: rows, });
             } else {
                 console.log(err);
-                res.status(500).send('Error while performing query. Please check your Limit and Offset parameters');
+                res.status(500).send('Error while performing query. Please check your parameters');
             }
-        });
+    });
 });
 
 
@@ -148,6 +151,57 @@ router.get('/articleSearch', function (req, res) {
     db.query(dbQueryCommand, function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ NewsArticle: rows, });
+        } else {
+            console.log('Error while performing Query.');
+            res.status(500).send(err);
+        }
+    });
+});
+
+
+/* GET A list of fish that matches the search keywords */
+//Note: Our SQL database is case insensitive for any string data
+//Input
+//search: string that has the search keywords
+router.get('/fishSearch', function (req, res) {
+    if (req.query.search === undefined) {
+        res.status(500).send("'search' parameter must be specified!");
+        return;
+    }
+
+    if (req.query.search == '') {
+        //send empty array so that nothing in the FlatList gets rendered
+        res.status(200).send({ List: [], });
+        return;
+    }
+
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
+    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    //Express automatically recognizes the '+' as being ' '
+    var searchWordArr = req.query.search.split(' ');
+    var dbQueryCommand = `SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
+                          FROM ebdb.FaoAreas AS fa
+                          INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`;
+
+    //generate SQL command
+    for (var i = 0; i < searchWordArr.length; i++) {
+        if (i == 0)
+            dbQueryCommand += " WHERE";
+        else
+            dbQueryCommand += " OR";
+
+        dbQueryCommand += ` sp.FBname LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR sp.Genus LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR sp.Species LIKE '%${searchWordArr[i]}%'`;
+    }
+    dbQueryCommand += " ORDER BY FBname LIMIT "+ limit +" OFFSET " + offset;
+
+    //send command to db
+    db.query(dbQueryCommand, function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ List: rows, });
         } else {
             console.log('Error while performing Query.');
             res.status(500).send(err);
