@@ -57,4 +57,24 @@ router.get('/geoCode', function (req, res) {
     });
   });
 
+  /* GET Nearby Restaurants from a specified lat long location within a certain distance */
+  router.get('/getNearbyRestaurants', function (req, res) {
+
+    if (req.query.lat == undefined || req.query.long == undefined 
+        || req.query.distance == undefined || req.query.limit == undefined) {
+      return res.status(500).send("Missing Required Fields!");
+    }
+  
+    db.query(`SELECT partner_name, partner_type, address_1, postal_code, phone_number, website, latitude, longitude  
+              FROM ebdb.Restaurant WHERE isValid=1`, function (err, rows, fields) {
+      if (!err) {
+        var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
+        res.status(200).send({ result });
+      } else {
+        console.log(err);
+        res.status(500).send('Error while performing Query.');
+      }
+    });
+  });
+
  module.exports = router;

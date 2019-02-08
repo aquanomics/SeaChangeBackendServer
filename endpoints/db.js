@@ -9,6 +9,8 @@ const router = express.Router();
 const fishBaseFaoAreasUrl = "https://fishbase.ropensci.org/faoareas/?limit=5000&AreaCode=21";
 const fishBaseSpeciesUrl = "https://fishbase.ropensci.org/species/?limit=5000&offset=0";
 
+const restaurantData = require('../json-files/restaurantdata.json');
+
 /* GET. To update the faoareas table in the db */
 router.get('/update/faoareas', function (req, res) {
 
@@ -120,6 +122,49 @@ router.get('/update/species', function (req, res) {
             res.status(500).send(errorMsg);
         });
 
+});
+
+/* GET. To update the restaurant table in the db */
+router.get('/update/restaurant', function (req, res) {
+
+        var jsonData = restaurantData;
+        var values = [];
+
+        for (var i = 0; i < jsonData.length; i++) {
+            values.push([jsonData[i].isValid, jsonData[i].location_id, jsonData[i].latitude, jsonData[i].longitude,
+            jsonData[i].address_1, jsonData[i].address_2, jsonData[i].city,
+            jsonData[i].province, jsonData[i].country, jsonData[i].postal_code,
+            jsonData[i].phone_number, jsonData[i].phone_number_extension, jsonData[i].website,
+            jsonData[i].partner_name, jsonData[i].partner_category, jsonData[i].partner_type,
+            jsonData[i].fishchoice]);
+        }
+
+        //TODO: Need to figure out best way to store this long query
+        const insertOrUpdateQuery = `INSERT INTO ebdb.Restaurant (isValid, location_id, latitude, longitude, 
+                                                                  address_1, address_2, city, province,
+                                                                  country, postal_code, phone_number, phone_number_extension,
+                                                                  website, partner_name, partner_category, partner_type,
+                                                                  fishchoice) 
+                                      VALUES ? ON DUPLICATE KEY UPDATE isValid = VALUES(isValid), location_id = VALUES(location_id),
+                                                                       latitude = VALUES(latitude), longitude = VALUES(longitude),
+                                                                       address_1 = VALUES(address_1), address_2 = VALUES(address_2),
+                                                                       city = VALUES(city), province = VALUES(province),
+                                                                       country = VALUES(country), postal_code = VALUES(postal_code),
+                                                                       phone_number = VALUES(phone_number), 
+                                                                       phone_number_extension = VALUES(phone_number_extension),
+                                                                       website = VALUES(website), partner_name = VALUES(partner_name),
+                                                                       partner_category = VALUES(partner_category), 
+                                                                       partner_type = VALUES(partner_type), fishchoice = VALUES(fishchoice)`;
+
+        db.query(insertOrUpdateQuery, [values], function (err, rows, fields) {
+            if (!err) {
+                console.log('Data are updated or inserted successfully');
+                res.status(200).send('SUCCESS: Data are updated or inserted successfully');
+            } else {
+                console.log('Error while performing INSERT/UPDATE.');
+                res.status(500).send(err);
+            }
+        });
 });
 
 //TODO: ONLY FOR DEBUGGING, REMOVE THIS LATER SINCE IT IS DANGEROUS.

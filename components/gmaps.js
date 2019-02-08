@@ -22,8 +22,15 @@ module.exports.getNearbyLocations = function getNearbyLocations(latitude, longit
     var nearbyLocations = [];
     var result = [];
     for(i=0; i  < locations.length; i++) {
-        var mlat = locations[i].lat;
-        var mlong = locations[i].lng;
+        var mlat = null; 
+        var mlong = null; 
+        if (locations[i].lat == undefined || locations[i].lng == undefined) {
+            mlat = locations[i].latitude;
+            mlong = locations[i].longitude;
+        } else {
+            mlat = locations[i].lat;
+            mlong = locations[i].lng;
+        }
         if(mlat == null || mlong == null) continue;
         var dLat  = toRadians(mlat - lat);
         var dLong = toRadians(mlong - long);
