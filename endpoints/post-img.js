@@ -26,7 +26,7 @@ router.post('/image-upload', function(req, res) {
           return res.status(200).send({'imageUrl': req.file.location, 'key': req.file.key});
         } else {
           console.log(err);
-          res.status(500).send("There was a problem registering the user.");
+          res.status(500).send('There was a problem uploading the image');
         }
     });
   });
