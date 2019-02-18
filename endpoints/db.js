@@ -6,7 +6,7 @@ const db = require('../components/db');
 const axios = require('../components/axios');
 const router = express.Router();
 
-const fishBaseFaoAreasUrl = "https://fishbase.ropensci.org/faoareas/?limit=5000&AreaCode=21";
+const fishBaseFaoAreasUrl = "https://fishbase.ropensci.org/faoareas/?limit=5000&AreaCode=18";
 const fishBaseSpeciesUrl = "https://fishbase.ropensci.org/species/?limit=5000&offset=0";
 
 const restaurantData = require('../json-files/restaurantdata.json');

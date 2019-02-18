@@ -181,7 +181,7 @@ router.get('/fishSearch', function (req, res) {
     //NOTE: Still split on ' ' even though URL encoding represents space as '+'
     //Express automatically recognizes the '+' as being ' '
     var searchWordArr = req.query.search.split(' ');
-    var dbQueryCommand = `SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
+    var dbQueryCommand = `SELECT DISTINCT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
                           FROM ebdb.FaoAreas AS fa
                           INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`;
 
@@ -205,6 +205,34 @@ router.get('/fishSearch', function (req, res) {
         } else {
             console.log('Error while performing Query.');
             res.status(500).send(err);
+        }
+    });
+});
+
+
+/* GET existing valid types of faoareas  */
+router.get('/validFaoareas', function (req, res) {
+  
+    db.query('SELECT DISTINCT AreaCode FROM ebdb.FaoAreas', function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ ValidFaoAreas: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
+});
+
+
+/* GET existing valid categories of news articles  */
+router.get('/newsarticleCategories', function (req, res) {
+  
+    db.query('SELECT DISTINCT Category FROM ebdb.NewsArticle', function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ Categories: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
         }
     });
 });
