@@ -34,7 +34,7 @@ router.post('/register', function(req, res) {
             res.status(500).send("There was a problem registering the user.");
         }
     });
-  });
+});
 
 
 router.get('/test', verifyToken, function (req, res) {

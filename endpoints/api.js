@@ -5,8 +5,10 @@ const express = require('express');
 const db = require('../components/db');
 const router = express.Router();
 
+const auth = require('../auth/auth-firebase');
+
 /* GET Feature Collection */
-router.get('/featurecollection', function(req, res) {
+router.get('/featurecollection', auth.authenticate, function(req, res) {
     db.query('SELECT * FROM ebdb.FeatureCollection', function (err, rows, fields) {
         if (!err) {
           res.status(200).send({
@@ -230,6 +232,19 @@ router.get('/newsarticleCategories', function (req, res) {
     db.query('SELECT DISTINCT Category FROM ebdb.NewsArticle', function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ Categories: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
+});
+
+/* GET all different cities of all existing events  */
+router.get('/eventCities', function (req, res) {
+  
+    db.query('SELECT DISTINCT city FROM ebdb.Events', function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ Cities: rows, });
         } else {
             console.log(err);
             res.status(500).send('Error while performing Query.');
