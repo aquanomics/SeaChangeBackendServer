@@ -4,8 +4,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require('../components/db');
+const auth = require('../auth/auth-firebase');
 
-router.post('/article-upload', function(req, res) {
+router.post('/article-upload', auth.authenticate, function(req, res) {
 
     if (req.body.url == undefined || req.body.description == undefined) return  res.status(500).send("Request Body is not set properly");
 
