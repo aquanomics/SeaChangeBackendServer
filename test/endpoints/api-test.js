@@ -147,7 +147,7 @@ const auth = require('../../auth/auth-firebase');
  describe('/GET a list of events', () => {
   it('should GET a list of events from the DB', (done) => {
     chai.request(app)
-        .get('/api/events')
+        .get('/api/events?city=Vancouver')
         .end((err, res) => {
               res.should.have.status(200);
               res.body.should.be.a('object');
