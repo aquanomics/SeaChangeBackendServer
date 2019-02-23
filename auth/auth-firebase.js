@@ -9,9 +9,9 @@ admin.initializeApp({
 
 module.exports.authenticate = function authenticate (req, res, next) {
 
-    if (req.query.idToken == null) return res.status(500).send('Missing authentication token id.');
+    if (req.body.idToken == null) return res.status(500).send('Missing authentication token id.');
 
-    admin.auth().verifyIdToken(req.query.idToken)
+    admin.auth().verifyIdToken(req.body.idToken)
         .then(function(decodedToken) {
             console.log(decodedToken);
             var uid = decodedToken.uid;

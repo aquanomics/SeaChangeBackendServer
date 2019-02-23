@@ -37,8 +37,6 @@ router.get('/newsarticle', function (req, res) {
             res.status(500).send('Error while performing Query.');
         }
     });
-
-    console.log('Processing /api/testing request');
 });
 
 /* GET FAO Areas NOTE: Currently only Area = 67 and Area = 21 which is West and East coast of Canada */
@@ -102,8 +100,12 @@ router.get('/listOfSpecies', function (req, res) {
 
 /* GET Events */
 router.get('/events', function (req, res) {
+    if (req.query.city === undefined) return res.status(500).send("Parameter city must be specified!");
+
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
   
-    db.query('SELECT * FROM ebdb.Events ORDER BY startDate', function (err, rows, fields) {
+    db.query('SELECT * FROM ebdb.Events WHERE city = ? ORDER BY startDate', [req.query.city], function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ Events: rows, });
         } else {
@@ -199,6 +201,55 @@ router.get('/fishSearch', function (req, res) {
         dbQueryCommand += ` OR sp.Species LIKE '%${searchWordArr[i]}%'`;
     }
     dbQueryCommand += " ORDER BY FBname LIMIT "+ limit +" OFFSET " + offset;
+
+    //send command to db
+    db.query(dbQueryCommand, function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ List: rows, });
+        } else {
+            console.log('Error while performing Query.');
+            res.status(500).send(err);
+        }
+    });
+});
+
+/* GET A list of events that matches the search keywords */
+//Note: Our SQL database is case insensitive for any string data
+//Input
+//search: string that has the search keywords
+router.get('/eventSearch', function (req, res) {
+    if (req.query.search === undefined) {
+        res.status(500).send("'search' parameter must be specified!");
+        return;
+    }
+
+    if (req.query.search == '') {
+        //send empty array so that nothing in the FlatList gets rendered
+        res.status(200).send({ List: [], });
+        return;
+    }
+
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
+    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    //Express automatically recognizes the '+' as being ' '
+    var searchWordArr = req.query.search.split(' ');
+    var dbQueryCommand = `SELECT * FROM ebdb.Events`;
+
+    //generate SQL command
+    for (var i = 0; i < searchWordArr.length; i++) {
+        if (i == 0)
+            dbQueryCommand += " WHERE";
+        else
+            dbQueryCommand += " OR";
+
+        dbQueryCommand += ` name LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR description LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR location LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR city LIKE '%${searchWordArr[i]}%'`;
+    }
+    dbQueryCommand += " ORDER BY startDate LIMIT "+ limit +" OFFSET " + offset;
 
     //send command to db
     db.query(dbQueryCommand, function (err, rows, fields) {

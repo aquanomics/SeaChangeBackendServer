@@ -5,12 +5,13 @@ const express = require("express");
 const router = express.Router();
 const s3 = require('../components/aws-s3');
 const db = require('../components/db');
+const auth = require('../auth/auth-firebase');
 
 const singleUpload = s3.single('image')
 
 // TODO: Currently the post info is part of the http request query.
 // Need to find a way to get Node.js to parse form-data body format. 
-router.post('/image-upload', function(req, res) {
+router.post('/image-upload', auth.authenticate, function(req, res) {
 
   if (req.query.name == undefined) return  res.status(500).send("Parameters or not specified properly");
   

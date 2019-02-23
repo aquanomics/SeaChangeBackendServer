@@ -17,7 +17,7 @@ router.post('/article-upload', auth.authenticate, function(req, res) {
             return res.status(200).send('Article successfully uploaded!');
         } else {
             console.log(err);
-            res.status(500).send("There was a problem registering the user.");
+            res.status(500).send("There was a problem uploading the article.");
         }
     });
 });
