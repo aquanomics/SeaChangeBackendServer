@@ -11,17 +11,16 @@ const singleUpload = s3.single('image')
 
 // TODO: Currently the post info is part of the http request query.
 // Need to find a way to get Node.js to parse form-data body format. 
-router.post('/image-upload', auth.authenticate, function(req, res) {
+router.post('/image-upload', function(req, res) {
 
-  if (req.query.name == undefined) return  res.status(500).send("Parameters or not specified properly");
-  
+  if (req.query.name == undefined) return  res.status(500).send("Parameters or not specified properly");  
   singleUpload(req, res, function(err, some) {
     if (err || req.file == undefined) {
       return res.status(422).send({errors: [{title: 'Image Upload Error', detail: err.message}] });
     }
 
-    db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, lng, urlToImage, imageKey) VALUES (?, ?, ?, ?, ?, ?)`,
-      [req.query.name, req.query.comment, req.query.lat, req.query.lng, req.file.location, req.file.key], 
+    db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, lng, urlToImage, imageKey, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [req.query.name, req.query.comment, req.query.lat, req.query.lng, req.file.location, req.file.key, new Date()], 
       function (err, rows, fields) {
         if (!err) {
           return res.status(200).send({'imageUrl': req.file.location, 'key': req.file.key});
