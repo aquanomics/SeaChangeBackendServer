@@ -9,7 +9,7 @@ const auth = require('../auth/auth-firebase');
 /* POST a new created firebase user to the DB */
 router.post('/register', auth.authenticate, function(req, res) {
 
-    if (req.body.uid == undefined || req.body.username == undefined) return  res.status(500).send("Request Body is not set properly");
+    if (req.body.uid == undefined || req.body.username == undefined) return  res.status(400).send("Request Body is not set properly");
   
     db.query(`INSERT INTO ebdb.Users (uid, username, created_at) VALUES (?, ?, ?)`,
         [req.body.uid, req.body.username, new Date()], 
@@ -28,7 +28,7 @@ router.post('/register', auth.authenticate, function(req, res) {
 router.get('/checkUsername', function(req, res) {
 
     //if (req.body.pass != '') return  res.status(500).send("Unauthorized");
-    if (req.query.username == undefined) return  res.status(500).send("Specify username");
+    if (req.query.username == undefined) return  res.status(400).send("Error unspecify username");
   
     db.query(`SELECT username FROM ebdb.Users WHERE username = ?`, [req.query.username], function (err, rows, fields) {
           if (!err) {

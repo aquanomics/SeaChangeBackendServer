@@ -8,10 +8,10 @@ const auth = require('../auth/auth-firebase');
 
 router.post('/article-upload', auth.authenticate, function(req, res) {
 
-    if (req.body.url == undefined || req.body.description == undefined) return  res.status(500).send("Request Body is not set properly");
+    if (req.body.url == undefined || req.body.description == undefined) return  res.status(400).send("Request Body is not set properly");
 
-    db.query(`INSERT INTO ebdb.NewsArticlePost (url, description, uploaded_at) VALUES (?, ?, ?)`,
-        [req.body.url, req.body.description, new Date()], 
+    db.query(`INSERT INTO ebdb.NewsArticlePost (url, description, uploaded_at, uid) VALUES (?, ?, ?, ?)`,
+        [req.body.url, req.body.description, new Date(), req.body.uid], 
         function (err, rows, fields) {
         if (!err) {
             return res.status(200).send('Article successfully uploaded!');

@@ -9,16 +9,14 @@ admin.initializeApp({
 
 module.exports.authenticate = function authenticate (req, res, next) {
 
-    if (req.body.idToken == null) return res.status(500).send('Missing authentication token id.');
+    if (req.body.idToken == null && req.query.idToken == null) return res.status(400).send('Missing authentication token id.');
 
-    admin.auth().verifyIdToken(req.body.idToken)
+    admin.auth().verifyIdToken(req.body.idToken || req.query.idToken)
         .then(function(decodedToken) {
-            console.log(decodedToken);
             var uid = decodedToken.uid;
-            console.log("Token uid is: " + uid);
             next();
         }).catch(function(error) {
-            res.status(500).send('Failed to authenticate token.');
+            res.status(401).send('Failed to authenticate token.');
         });
 }
 

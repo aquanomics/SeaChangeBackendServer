@@ -25,11 +25,11 @@ chai.use(chaiHttp);
           });
     });
 
-    it('should return error status 500 if any one of the parameter fields is not specified', (done) => {
+    it('should return error status 400 if any one of the parameter fields is not specified', (done) => {
         chai.request(app)
             .get('/map/getNearbyArticles?lat=49.190077&long=-123.103008&distance=100')
             .end((err, res) => {
-                  res.should.have.status(500);
+                  res.should.have.status(400);
                   expect(res.error.text).to.equal("Missing Required Fields!");
               done();
             });
@@ -51,11 +51,11 @@ chai.use(chaiHttp);
           });
     });
 
-    it('should return error status 500 if any one of the parameter fields is not specified', (done) => {
+    it('should return error status 400 if any one of the parameter fields is not specified', (done) => {
         chai.request(app)
             .get('/map/getNearbyPosts?lat=49.190077&long=-123.103008&distance=100')
             .end((err, res) => {
-                  res.should.have.status(500);
+                  res.should.have.status(400);
                   expect(res.error.text).to.equal("Missing Required Fields!");
               done();
             });
@@ -77,11 +77,11 @@ chai.use(chaiHttp);
           });
     });
 
-    it('should return error status 500 if the address parameter is not specified', (done) => {
+    it('should return error status 400 if the address parameter is not specified', (done) => {
         chai.request(app)
             .get('/map/geoCode')
             .end((err, res) => {
-                  res.should.have.status(500);
+                  res.should.have.status(400);
                   expect(res.error.text).to.equal("Address must be specified!");
               done();
             });

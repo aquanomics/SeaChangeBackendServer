@@ -1,4 +1,4 @@
-// AUTH ENDPOINTS CONTROLLER
+// DEPRECATED!: AUTH ENDPOINTS CONTROLLER
 // ===============================================
 const express = require('express');
 const router = express.Router();

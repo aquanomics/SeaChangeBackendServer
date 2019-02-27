@@ -23,7 +23,7 @@ router.get('/featurecollection', auth.authenticate, function(req, res) {
 
 /* GET News Article */
 router.get('/newsarticle', function (req, res) {
-    if (req.query.category === undefined) return res.status(500).send("Parameter category must be specified!");
+    if (req.query.category === undefined) return res.status(400).send("Parameter category must be specified!");
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
@@ -65,7 +65,7 @@ router.get('/species', function (req, res) {
 
 /* GET details info of a fish species */
 router.get('/speciesInfo', function (req, res) {
-    if (req.query.specCode === undefined) return res.status(500).send("Parameter specCode must be specified!");
+    if (req.query.specCode === undefined) return res.status(400).send("Parameter specCode must be specified!");
 
     db.query('SELECT * FROM ebdb.Species WHERE SpecCode = ' + req.query.specCode, function (err, rows, fields) {
         if (!err) {
@@ -100,7 +100,7 @@ router.get('/listOfSpecies', function (req, res) {
 
 /* GET Events */
 router.get('/events', function (req, res) {
-    if (req.query.city === undefined) return res.status(500).send("Parameter city must be specified!");
+    if (req.query.city === undefined) return res.status(400).send("Parameter city must be specified!");
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
@@ -122,14 +122,12 @@ router.get('/events', function (req, res) {
 //search: string that has the search keywords
 router.get('/articleSearch', function (req, res) {
     if (req.query.search === undefined) {
-        res.status(500).send("'search' parameter must be specified!");
-        return;
+        return res.status(400).send("'search' parameter must be specified!");
     }
 
     if (req.query.search == '') {
         //send empty array so that nothing in the FlatList gets rendered
-        res.status(200).send({ NewsArticle: [], });
-        return;
+        return res.status(200).send({ NewsArticle: [], });
     }
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
@@ -169,14 +167,12 @@ router.get('/articleSearch', function (req, res) {
 //search: string that has the search keywords
 router.get('/fishSearch', function (req, res) {
     if (req.query.search === undefined) {
-        res.status(500).send("'search' parameter must be specified!");
-        return;
+        return res.status(400).send("'search' parameter must be specified!");
     }
 
     if (req.query.search == '') {
         //send empty array so that nothing in the FlatList gets rendered
-        res.status(200).send({ List: [], });
-        return;
+        return res.status(200).send({ List: [], });
     }
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
@@ -219,14 +215,12 @@ router.get('/fishSearch', function (req, res) {
 //search: string that has the search keywords
 router.get('/eventSearch', function (req, res) {
     if (req.query.search === undefined) {
-        res.status(500).send("'search' parameter must be specified!");
-        return;
+        return res.status(400).send("'search' parameter must be specified!");
     }
 
     if (req.query.search == '') {
         //send empty array so that nothing in the FlatList gets rendered
-        res.status(200).send({ List: [], });
-        return;
+        return res.status(200).send({ List: [], });
     }
 
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;

@@ -8,7 +8,7 @@ const router = express.Router();
 
 /* GET GeoCode of a specified location using Google Maps GeoCode API */
 router.get('/geoCode', function (req, res) {
-    if (req.query.address === undefined) return res.status(500).send("Address must be specified!");
+    if (req.query.address === undefined) return res.status(400).send("Address must be specified!");
   
     gmaps.getGeoCode(req.query.address,
       function (response) {
@@ -24,7 +24,7 @@ router.get('/geoCode', function (req, res) {
  
    if (req.query.lat == undefined || req.query.long == undefined 
        || req.query.distance == undefined || req.query.limit == undefined) {
-     return res.status(500).send("Missing Required Fields!");
+     return res.status(400).send("Missing Required Fields!");
    }
  
    db.query('SELECT * FROM ebdb.NewsArticle', function (err, rows, fields) {
@@ -43,7 +43,7 @@ router.get('/geoCode', function (req, res) {
  
     if (req.query.lat == undefined || req.query.long == undefined 
         || req.query.distance == undefined || req.query.limit == undefined) {
-      return res.status(500).send("Missing Required Fields!");
+      return res.status(400).send("Missing Required Fields!");
     }
   
     db.query('SELECT * FROM ebdb.ImagePost WHERE approved=1', function (err, rows, fields) {
@@ -62,7 +62,7 @@ router.get('/geoCode', function (req, res) {
 
     if (req.query.lat == undefined || req.query.long == undefined 
         || req.query.distance == undefined || req.query.limit == undefined) {
-      return res.status(500).send("Missing Required Fields!");
+      return res.status(400).send("Missing Required Fields!");
     }
   
     db.query(`SELECT partner_name, partner_type, address_1, postal_code, phone_number, website, latitude, longitude  

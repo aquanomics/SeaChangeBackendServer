@@ -70,11 +70,11 @@ const auth = require('../../auth/auth-firebase');
         });
   });
 
-  it('should return error status 500 if category is not specified', (done) => {
+  it('should return error status 400 if category is not specified', (done) => {
     chai.request(app)
         .get('/api/newsarticle')
         .end((err, res) => {
-              res.should.have.status(500);
+              res.should.have.status(400);
               expect(res.error.text).to.equal("Parameter category must be specified!");
           done();
         });
@@ -112,11 +112,11 @@ const auth = require('../../auth/auth-firebase');
         });
   });
 
-  it('should return error status 500 if spec code is not specified', (done) => {
+  it('should return error status 400 if spec code is not specified', (done) => {
     chai.request(app)
         .get('/api/speciesInfo')
         .end((err, res) => {
-              res.should.have.status(500);
+              res.should.have.status(400);
               expect(res.error.text).to.equal("Parameter specCode must be specified!");
           done();
         });
