@@ -4,8 +4,6 @@ const app = require('../../app');
 
 const sinon = require('sinon');
 
-const clearRequire = require('clear-require');
-
 //Chai dependencies
 const chai = require('chai');
 const chaiHttp = require('chai-http');
