@@ -105,9 +105,29 @@ router.get('/events', function (req, res) {
     var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
   
-    db.query('SELECT * FROM ebdb.Events WHERE city = ? ORDER BY startDate', [req.query.city], function (err, rows, fields) {
+    db.query('SELECT * FROM ebdb.Events WHERE city = ? ORDER BY startDate'
+              + " LIMIT " + limit + " OFFSET " + offset, [req.query.city], function (err, rows, fields) {
         if (!err) {
             res.status(200).send({ Events: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
+});
+
+
+/* GET User's Posts */
+router.get('/posts', auth.authenticate, function (req, res) {
+    if (req.query.uid === undefined) return res.status(400).send("Parameter uid must be specified!");
+
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+  
+    db.query('SELECT * FROM ebdb.ImagePost WHERE uid = ? ORDER BY uploaded_at'
+              + " LIMIT " + limit + " OFFSET " + offset, [req.query.uid], function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ Posts: rows, });
         } else {
             console.log(err);
             res.status(500).send('Error while performing Query.');
