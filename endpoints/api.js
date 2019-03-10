@@ -276,6 +276,55 @@ router.get('/eventSearch', function (req, res) {
     });
 });
 
+/* GET A list of posts that matches the search keywords */
+//Note: Our SQL database is case insensitive for any string data
+//Input
+//search: string that has the search keywords
+router.get('/postSearch',  auth.authenticate, function (req, res) {
+    if (req.query.search === undefined) {
+        return res.status(400).send("'search' parameter must be specified!");
+    }
+
+    if (req.query.uid === undefined) {
+        return res.status(400).send("Missing additional field!");
+    }
+
+    if (req.query.search == '') {
+        //send empty array so that nothing in the FlatList gets rendered
+        return res.status(200).send({ List: [], });
+    }
+
+    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
+    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+
+    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    //Express automatically recognizes the '+' as being ' '
+    var searchWordArr = req.query.search.split(' ');
+    var dbQueryCommand = `SELECT * FROM ebdb.ImagePost WHERE uid = "` + req.query.uid + '"';
+
+    //generate SQL command
+    for (var i = 0; i < searchWordArr.length; i++) {
+        if (i == 0)
+            dbQueryCommand += " AND";
+        else
+            dbQueryCommand += " OR";
+
+        dbQueryCommand += ` name LIKE '%${searchWordArr[i]}%'`;
+        dbQueryCommand += ` OR comment LIKE '%${searchWordArr[i]}%'`;
+    }
+    dbQueryCommand += " ORDER BY uploaded_at LIMIT "+ limit +" OFFSET " + offset;
+
+    //send command to db
+    db.query(dbQueryCommand, function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ List: rows, });
+        } else {
+            console.log('Error while performing Query.');
+            res.status(500).send(err);
+        }
+    });
+});
+
 
 /* GET existing valid types of faoareas  */
 router.get('/validFaoareas', function (req, res) {
