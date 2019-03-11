@@ -135,6 +135,20 @@ router.get('/posts', auth.authenticate, function (req, res) {
     });
 });
 
+/* GET User data */
+router.get('/user', auth.authenticate, function (req, res) {
+    if (req.query.uid === undefined) return res.status(400).send("Parameter uid must be specified!");
+  
+    db.query('SELECT * FROM ebdb.Users WHERE uid = ?', [req.query.uid], function (err, rows, fields) {
+        if (!err) {
+            res.status(200).send({ User: rows, });
+        } else {
+            console.log(err);
+            res.status(500).send('Error while performing Query.');
+        }
+    });
+});
+
 
 /* GET A list of articles that matches the search keywords */
 //Note: Our SQL database is case insensitive for any string data
