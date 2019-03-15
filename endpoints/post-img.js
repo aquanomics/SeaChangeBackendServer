@@ -40,8 +40,16 @@ router.post('/image-upload', auth.authenticate, function(req, res) {
       return res.status(500).send({errors: [{title: 'Image Upload Error', detail: err.message}] });
     }
 
+    var latitude = req.query.lat; 
+    var longitude = req.query.long;
+
+    if(latitude == 0 && longitude == 0) {
+      latitude = null;
+      longitude = null;
+    }
+
     db.query(`INSERT INTO ebdb.ImagePost (name, comment, lat, lng, urlToImage, imageKey, uploaded_at, uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [req.query.name, req.query.comment, req.query.lat, req.query.lng, req.file.location, req.file.key, new Date(), req.query.uid], 
+      [req.query.name, req.query.comment, latitude, longitude, req.file.location, req.file.key, new Date(), req.query.uid], 
       function (err, rows, fields) {
         if (!err) {
           return res.status(200).send({'imageUrl': req.file.location, 'key': req.file.key});
