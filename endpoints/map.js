@@ -77,4 +77,23 @@ router.get('/geoCode', function (req, res) {
     });
   });
 
+  /* GET Nearby Events from a specified lat long location within a certain distance */
+  router.get('/getNearbyEvents', function (req, res) {
+
+    if (req.query.lat == undefined || req.query.long == undefined 
+        || req.query.distance == undefined || req.query.limit == undefined) {
+      return res.status(400).send("Missing Required Fields!");
+    }
+  
+    db.query(`SELECT * FROM ebdb.Events`, function (err, rows, fields) {
+      if (!err) {
+        var result = gmaps.getNearbyLocations(req.query.lat, req.query.long, req.query.distance, req.query.limit, rows);
+        res.status(200).send({ result });
+      } else {
+        console.log(err);
+        res.status(500).send('Error while performing Query.');
+      }
+    });
+  });
+
  module.exports = router;
