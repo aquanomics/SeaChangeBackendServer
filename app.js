@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 
 const apiEndpoints = require('./endpoints/api');
 const mapEndpoints = require('./endpoints/map');
@@ -30,7 +29,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // AUTH CONTROLLER 
 // ===============================================
@@ -47,17 +45,16 @@ app.use('/users', usersEndpoints);
 
 // ERROR HANDLERS
 // =============================================== 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
-
-// Main Boom http error handler
+// Main http error handler
 app.use(function (err, req, res, next) {
   if (err.isServer) {
     console.log(err);
   }
-  console.log(err.output);
+
+  if (err.output === undefined) {
+    return next(createError(404));
+  }
+
   return res.status(err.output.statusCode).json(err.output.payload);
 });
 

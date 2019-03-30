@@ -8,7 +8,6 @@ admin.initializeApp({
 });
 
 module.exports.authenticate = function authenticate (req, res, next) {
-
     if (req.body.idToken == null && req.query.idToken == null) return res.status(400).send('Missing authentication token id.');
 
     admin.auth().verifyIdToken(req.body.idToken || req.query.idToken)

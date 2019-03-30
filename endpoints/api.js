@@ -59,20 +59,6 @@ router.get('/faoareas', function (req, res, next) {
     });
 });
 
-/* GET All Fish Species TODO: WILL BE REMOVE LATER*/
-router.get('/species', function (req, res) {
-    db.query('SELECT * FROM ebdb.Species', function (err, rows, fields) {
-        if (!err) {
-            res.status(200).send({
-                Species: rows,
-            });
-        } else {
-            console.log(err);
-            res.status(500).send('Error while performing Query.');
-        }
-    });
-});
-
 /* GET details info of a fish species */
 router.get('/speciesInfo', function (req, res, next) {
     if (req.query.specCode === undefined) {
@@ -180,208 +166,200 @@ router.get('/user', auth.authenticate, function (req, res, next) {
 });
 
 
-/* GET A list of articles that matches the search keywords */
-//Note: Our SQL database is case insensitive for any string data
-//Input
-//search: string that has the search keywords
-router.get('/articleSearch', function (req, res) {
+/* GET List of articles that matches the search keywords */
+// Note: Our SQL database is case insensitive for any string data
+// Input Search: string that has the search keywords
+router.get('/articleSearch', function (req, res, next) {
     if (req.query.search === undefined) {
-        return res.status(400).send("'search' parameter must be specified!");
+        return next(boom.badRequest('Parameter search must be specified!'));
     }
 
-    if (req.query.search == '') {
-        //send empty array so that nothing in the FlatList gets rendered
+    if (req.query.search === '') {
+        // Send empty array so that nothing in the FlatList gets rendered
         return res.status(200).send({
             NewsArticle: [],
         });
     }
 
-    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
-    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+    let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
+    let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
     //NOTE: Still split on ' ' even though URL encoding represents space as '+'
-    //Express automatically recognizes the '+' as being ' '
-    var searchWordArr = req.query.search.split(' ');
-    var dbQueryCommand = "SELECT * FROM ebdb.NewsArticle";
+    // Express automatically recognizes the '+' as being ' '
+    let searchWordArr = req.query.search.split(' ');
+    let sqlQuery = "SELECT * FROM ebdb.NewsArticle";
 
-    //generate SQL command
-    for (var i = 0; i < searchWordArr.length; i++) {
-        if (i == 0)
-            dbQueryCommand += " WHERE";
-        else
-            dbQueryCommand += " AND";
-
-        dbQueryCommand += ` title LIKE '%${searchWordArr[i]}%'`;
-    }
-    dbQueryCommand += " ORDER BY published_at DESC LIMIT " + limit + " OFFSET " + offset;
-
-    //send command to db
-    db.query(dbQueryCommand, function (err, rows, fields) {
-        if (!err) {
-            res.status(200).send({
-                NewsArticle: rows,
-            });
+    for (let i = 0; i < searchWordArr.length; i++) {
+        if (i == 0) {
+            sqlQuery += " WHERE";
         } else {
-            console.log('Error while performing Query.');
-            res.status(500).send(err);
+            sqlQuery += " AND";
         }
+
+        sqlQuery += ` title LIKE '%${searchWordArr[i]}%'`;
+    }
+
+    sqlQuery += " ORDER BY published_at DESC LIMIT " + limit + " OFFSET " + offset;
+
+    db.query(sqlQuery, function (err, rows, fields) {
+        if (err) {
+            return next(boom.badImplementation(err));
+        }
+
+        res.status(200).send({
+            NewsArticle: rows,
+        });
     });
 });
 
 
-/* GET A list of fish that matches the search keywords */
-//Note: Our SQL database is case insensitive for any string data
-//Input
-//search: string that has the search keywords
-router.get('/fishSearch', function (req, res) {
+/* GET List of fish that matches the search keywords */
+// Note: Our SQL database is case insensitive for any string data
+// Input Search: string that has the search keywords
+router.get('/fishSearch', function (req, res, next) {
     if (req.query.search === undefined) {
-        return res.status(400).send("'search' parameter must be specified!");
+        return next(boom.badRequest('Parameter search must be specified!'));
     }
 
-    if (req.query.search == '') {
-        //send empty array so that nothing in the FlatList gets rendered
+    if (req.query.search === '') {
+        // Send empty array so that nothing in the FlatList gets rendered
         return res.status(200).send({
             List: [],
         });
     }
 
-    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
-    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+    let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
+    let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
-    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
-    //Express automatically recognizes the '+' as being ' '
-    var searchWordArr = req.query.search.split(' ');
-    var dbQueryCommand = `SELECT DISTINCT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
+    // NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    // Express automatically recognizes the '+' as being ' '
+    let searchWordArr = req.query.search.split(' ');
+    let sqlQuery = `SELECT DISTINCT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
                           FROM ebdb.FaoAreas AS fa
                           INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`;
 
-    //generate SQL command
-    for (var i = 0; i < searchWordArr.length; i++) {
-        if (i == 0)
-            dbQueryCommand += " WHERE";
-        else
-            dbQueryCommand += " OR";
-
-        dbQueryCommand += ` sp.FBname LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR sp.Genus LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR sp.Species LIKE '%${searchWordArr[i]}%'`;
-    }
-    dbQueryCommand += " ORDER BY FBname LIMIT " + limit + " OFFSET " + offset;
-
-    //send command to db
-    db.query(dbQueryCommand, function (err, rows, fields) {
-        if (!err) {
-            res.status(200).send({
-                List: rows,
-            });
+    for (let i = 0; i < searchWordArr.length; i++) {
+        if (i == 0) {
+            sqlQuery += " WHERE";
         } else {
-            console.log('Error while performing Query.');
-            res.status(500).send(err);
+            sqlQuery += " OR";
         }
+
+        sqlQuery += ` sp.FBname LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR sp.Genus LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR sp.Species LIKE '%${searchWordArr[i]}%'`;
+    }
+
+    sqlQuery += " ORDER BY FBname LIMIT " + limit + " OFFSET " + offset;
+
+    db.query(sqlQuery, function (err, rows, fields) {
+        if (err) {
+            return next(boom.badImplementation(err));
+        }
+
+        res.status(200).send({
+            List: rows,
+        });
     });
 });
 
 /* GET A list of events that matches the search keywords */
-//Note: Our SQL database is case insensitive for any string data
-//Input
-//search: string that has the search keywords
-router.get('/eventSearch', function (req, res) {
+// Note: Our SQL database is case insensitive for any string data
+// Input Search: string that has the search keywords
+router.get('/eventSearch', function (req, res, next) {
     if (req.query.search === undefined) {
-        return res.status(400).send("'search' parameter must be specified!");
+        return next(boom.badRequest('Parameter search must be specified!'));
     }
 
-    if (req.query.search == '') {
-        //send empty array so that nothing in the FlatList gets rendered
+    if (req.query.search === '') {
+        // Send empty array so that nothing in the FlatList gets rendered
         return res.status(200).send({
             List: [],
         });
     }
 
-    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
-    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+    let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
+    let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
-    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
-    //Express automatically recognizes the '+' as being ' '
-    var searchWordArr = req.query.search.split(' ');
-    var dbQueryCommand = `SELECT * FROM ebdb.Events`;
+    // NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    // Express automatically recognizes the '+' as being ' '
+    let searchWordArr = req.query.search.split(' ');
+    let sqlQuery = `SELECT * FROM ebdb.Events`;
 
-    //generate SQL command
-    for (var i = 0; i < searchWordArr.length; i++) {
-        if (i == 0)
-            dbQueryCommand += " WHERE";
-        else
-            dbQueryCommand += " OR";
-
-        dbQueryCommand += ` name LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR description LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR location LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR city LIKE '%${searchWordArr[i]}%'`;
-    }
-    dbQueryCommand += " ORDER BY startDate LIMIT " + limit + " OFFSET " + offset;
-
-    //send command to db
-    db.query(dbQueryCommand, function (err, rows, fields) {
-        if (!err) {
-            res.status(200).send({
-                List: rows,
-            });
+    for (let i = 0; i < searchWordArr.length; i++) {
+        if (i == 0) {
+            sqlQuery += " WHERE";
         } else {
-            console.log('Error while performing Query.');
-            res.status(500).send(err);
+            sqlQuery += " OR";
         }
+
+        sqlQuery += ` name LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR description LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR location LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR city LIKE '%${searchWordArr[i]}%'`;
+    }
+
+    sqlQuery += " ORDER BY startDate LIMIT " + limit + " OFFSET " + offset;
+
+    db.query(sqlQuery, function (err, rows, fields) {
+        if (err) {
+            return next(boom.badImplementation(err));
+        }
+
+        res.status(200).send({
+            List: rows,
+        });
     });
 });
 
 /* GET A list of posts that matches the search keywords */
-//Note: Our SQL database is case insensitive for any string data
-//Input
-//search: string that has the search keywords
-router.get('/postSearch', auth.authenticate, function (req, res) {
+// Note: Our SQL database is case insensitive for any string data
+// Input Search: string that has the search keywords
+router.get('/postSearch', auth.authenticate, function (req, res, next) {
     if (req.query.search === undefined) {
-        return res.status(400).send("'search' parameter must be specified!");
+        return next(boom.badRequest('Parameter search must be specified!'));
     }
 
     if (req.query.uid === undefined) {
-        return res.status(400).send("Missing additional field!");
+        return next(boom.badRequest('Missing additional field!'));
     }
 
-    if (req.query.search == '') {
-        //send empty array so that nothing in the FlatList gets rendered
+    if (req.query.search === '') {
+        // Send empty array so that nothing in the FlatList gets rendered
         return res.status(200).send({
             List: [],
         });
     }
 
-    var limit = (req.query.limit == undefined) ? 10 : req.query.limit;
-    var offset = (req.query.offset == undefined) ? 0 : req.query.offset;
+    let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
+    let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
-    //NOTE: Still split on ' ' even though URL encoding represents space as '+'
-    //Express automatically recognizes the '+' as being ' '
-    var searchWordArr = req.query.search.split(' ');
-    var dbQueryCommand = `SELECT * FROM ebdb.ImagePost WHERE uid = "` + req.query.uid + '"';
+    // NOTE: Still split on ' ' even though URL encoding represents space as '+'
+    // Express automatically recognizes the '+' as being ' '
+    let searchWordArr = req.query.search.split(' ');
+    let sqlQuery = `SELECT * FROM ebdb.ImagePost WHERE uid = "` + req.query.uid + '"';
 
-    //generate SQL command
-    for (var i = 0; i < searchWordArr.length; i++) {
-        if (i == 0)
-            dbQueryCommand += " AND";
-        else
-            dbQueryCommand += " OR";
-
-        dbQueryCommand += ` name LIKE '%${searchWordArr[i]}%'`;
-        dbQueryCommand += ` OR comment LIKE '%${searchWordArr[i]}%'`;
-    }
-    dbQueryCommand += " ORDER BY uploaded_at LIMIT " + limit + " OFFSET " + offset;
-
-    //send command to db
-    db.query(dbQueryCommand, function (err, rows, fields) {
-        if (!err) {
-            res.status(200).send({
-                List: rows,
-            });
+    for (let i = 0; i < searchWordArr.length; i++) {
+        if (i == 0) {
+            sqlQuery += " AND";
         } else {
-            console.log('Error while performing Query.');
-            res.status(500).send(err);
+            sqlQuery += " OR";
         }
+
+        sqlQuery += ` name LIKE '%${searchWordArr[i]}%'`;
+        sqlQuery += ` OR comment LIKE '%${searchWordArr[i]}%'`;
+    }
+
+    sqlQuery += " ORDER BY uploaded_at LIMIT " + limit + " OFFSET " + offset;
+
+    db.query(sqlQuery, function (err, rows, fields) {
+        if (err) {
+            return next(boom.badImplementation(err));
+        }
+
+        res.status(200).send({
+            List: rows,
+        });
     });
 });
 

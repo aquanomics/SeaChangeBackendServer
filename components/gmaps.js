@@ -16,14 +16,14 @@ module.exports.getGeoCode = function getGeoCode(location, onSuccess, onError) {
 };
 
 module.exports.getNearbyLocations = function getNearbyLocations(latitude, longitude, distance, limit, locations) {
-    var lat = latitude;
-    var long = longitude;
+    let lat = latitude;
+    let long = longitude;
     const R = 6371; // Radius of earth in km
-    var nearbyLocations = [];
-    var result = [];
+    let nearbyLocations = [];
+    let result = [];
     for(i=0; i  < locations.length; i++) {
-        var mlat = null; 
-        var mlong = null; 
+        let mlat = null; 
+        let mlong = null; 
         if (locations[i].lat == undefined || locations[i].lng == undefined) {
             mlat = locations[i].latitude;
             mlong = locations[i].longitude;
@@ -31,13 +31,16 @@ module.exports.getNearbyLocations = function getNearbyLocations(latitude, longit
             mlat = locations[i].lat;
             mlong = locations[i].lng;
         }
+        
         if(mlat == null || mlong == null) continue;
-        var dLat  = toRadians(mlat - lat);
-        var dLong = toRadians(mlong - long);
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+
+        let dLat  = toRadians(mlat - lat);
+        let dLong = toRadians(mlong - long);
+        let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
             Math.cos(toRadians(lat)) * Math.cos(toRadians(lat)) * Math.sin(dLong/2) * Math.sin(dLong/2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        var d = R * c;
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        let d = R * c;
+
         if(d <= distance) {
             locations[i].distance = d;
             nearbyLocations.push(locations[i]);
@@ -45,7 +48,7 @@ module.exports.getNearbyLocations = function getNearbyLocations(latitude, longit
     }
 
     nearbyLocations.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-    var boundary = (limit > nearbyLocations.length) ?  nearbyLocations.length : limit;
+    let boundary = (limit > nearbyLocations.length) ?  nearbyLocations.length : limit;
 
     for(i=0; i  < boundary; i++) result.push(nearbyLocations[i]);
  
