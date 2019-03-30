@@ -38,8 +38,8 @@ router.get('/geoCode', function (req, res, next) {
         response
       });
     },
-    function (errorMsg) {
-      res.status(500).send(errorMsg);
+    function (err) {
+      next(boom.badImplementation(err));
     });
 });
 
@@ -68,7 +68,7 @@ router.get('/getNearbyRestaurants', function (req, res, next) {
 /* GET Nearby Events from a specified lat long location within a certain distance */
 router.get('/getNearbyEvents', function (req, res, next) {
   let sqlQuery = `SELECT * FROM ebdb.Events`;
-  
+
   return handleGetLocations(sqlQuery, req, res, next);
 });
 

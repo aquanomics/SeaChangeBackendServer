@@ -30,7 +30,7 @@ chai.use(chaiHttp);
             .get('/map/getNearbyArticles?lat=49.190077&long=-123.103008&distance=100')
             .end((err, res) => {
                   res.should.have.status(400);
-                  expect(res.error.text).to.equal("Missing Required Fields!");
+                  expect(res.body.message).to.equal("Missing Required Fields!");
               done();
             });
       });
@@ -56,7 +56,7 @@ chai.use(chaiHttp);
             .get('/map/getNearbyPosts?lat=49.190077&long=-123.103008&distance=100')
             .end((err, res) => {
                   res.should.have.status(400);
-                  expect(res.error.text).to.equal("Missing Required Fields!");
+                  expect(res.body.message).to.equal("Missing Required Fields!");
               done();
             });
       });
@@ -82,7 +82,7 @@ chai.use(chaiHttp);
             .get('/map/geoCode')
             .end((err, res) => {
                   res.should.have.status(400);
-                  expect(res.error.text).to.equal("Address must be specified!");
+                  expect(res.body.message).to.equal('Parameter address must be specified!');
               done();
             });
       });
