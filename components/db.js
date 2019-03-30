@@ -1,8 +1,8 @@
 // MYSQL DB CONNECTION SETUP
 // ===============================================
 
-const  mysql = require('mysql');
-const  connection_settings = require('../config');
+const mysql = require('mysql');
+const connection_settings = require('../config');
 var db;
 
 //Connect to MySql DB
@@ -20,4 +20,4 @@ function connectDatabase() {
     return db;
 }
 
-module.exports = connectDatabase();  
+module.exports = connectDatabase();

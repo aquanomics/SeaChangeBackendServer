@@ -2,6 +2,7 @@
 // ===============================================
 
 const express = require('express');
+const boom = require('boom');
 const db = require('../components/db');
 const axios = require('../components/axios');
 const router = express.Router();
@@ -11,16 +12,26 @@ const fishBaseSpeciesUrl = "https://fishbase.ropensci.org/species/?limit=5000&of
 
 const restaurantData = require('../json-files/restaurantdata.json');
 
+const handleInsertOrUpdate = function (sqlQuery, res, values, next) {
+    db.query(sqlQuery, [values], function (err, rows, fields) {
+        if (err) {
+            return next(boom.badImplementation(err));
+        }
+
+        res.status(200).send('SUCCESS: Data are inserted or updated successfully');
+    });
+};
+
 /* GET. To update the faoareas table in the db */
-router.get('/update/faoareas', function (req, res) {
+router.get('/update/faoareas', function (req, res, next) {
 
     axios.getRequest(fishBaseFaoAreasUrl,
         function (response) {
 
-            var jsonData = response.data;
-            var values = [];
+            let jsonData = response.data;
+            let values = [];
 
-            for (var i = 0; i < jsonData.length; i++) {
+            for (let i = 0; i < jsonData.length; i++) {
                 values.push([jsonData[i].autoctr, jsonData[i].AreaCode, jsonData[i].SpecCode, jsonData[i].StockCode,
                 jsonData[i].Status, jsonData[i].Entered, jsonData[i].DateEntered,
                 jsonData[i].Modified, jsonData[i].DateModified, jsonData[i].Expert,
@@ -28,7 +39,7 @@ router.get('/update/faoareas', function (req, res) {
             }
 
             //TODO: Need to figure out best way to store this long query
-            const insertOrUpdateQuery = `INSERT INTO ebdb.FaoAreas (autoctr, AreaCode, SpecCode, StockCode, 
+            let insertOrUpdateQuery = `INSERT INTO ebdb.FaoAreas (autoctr, AreaCode, SpecCode, StockCode, 
                                                                 Status, Entered, DateEntered, Modified,
                                                                 DateModified, Expert, DateChecked, TS) 
                                       VALUES ? ON DUPLICATE KEY UPDATE AreaCode = VALUES(AreaCode), SpecCode = VALUES(SpecCode),
@@ -38,30 +49,22 @@ router.get('/update/faoareas', function (req, res) {
                                                                        Expert = VALUES(Expert), DateChecked = VALUES(DateChecked),
                                                                        TS = VALUES(TS)`;
 
-            db.query(insertOrUpdateQuery, [values], function (err, rows, fields) {
-                if (!err) {
-                    console.log('Data are updated or inserted successfully');
-                    res.status(200).send('SUCCESS: Data are updated or inserted successfully');
-                } else {
-                    console.log('Error while performing INSERT/UPDATE.');
-                    res.status(500).send(err);
-                }
-            });
+            return handleInsertOrUpdate(insertOrUpdateQuery, res, values, next);
         },
-        function (errorMsg) {
-            res.status(500).send(errorMsg);
+        function (err) {
+            next(boom.badImplementation(err));
         });
 });
 
 /* GET. To update the species table in the db */
-router.get('/update/species', function (req, res) {
+router.get('/update/species', function (req, res, next) {
     axios.getRequest(fishBaseSpeciesUrl,
         function (response) {
 
-            var jsonData = response.data;
-            var values = [];
+            let jsonData = response.data;
+            let values = [];
 
-            for (var i = 0; i < jsonData.length; i++) {
+            for (let i = 0; i < jsonData.length; i++) {
                 values.push([jsonData[i].SpecCode, jsonData[i].Genus, jsonData[i].Species, jsonData[i].SpeciesRefNo,
                 jsonData[i].Author, jsonData[i].FBname, jsonData[i].PicPreferredName,
                 jsonData[i].FamCode, jsonData[i].Subfamily, jsonData[i].GenCode,
@@ -108,29 +111,21 @@ router.get('/update/species', function (req, res) {
                                                                        Expert = VALUES(Expert), DateChecked = VALUES(DateChecked),
                                                                        TS = VALUES(TS)`;
 
-            db.query(insertOrUpdateQuery, [values], function (err, rows, fields) {
-                if (!err) {
-                    console.log('Data are updated or inserted successfully');
-                    res.status(200).send('SUCCESS: Data are updated or inserted successfully');
-                } else {
-                    console.log('Error while performing INSERT/UPDATE.');
-                    res.status(500).send(err);
-                }
-            });
+            return handleInsertOrUpdate(insertOrUpdateQuery, res, values, next);
         },
-        function (errorMsg) {
-            res.status(500).send(errorMsg);
+        function (err) {
+            next(boom.badImplementation(err));
         });
 
 });
 
 /* GET. To update the restaurant table in the db */
-router.get('/update/restaurant', function (req, res) {
+router.get('/update/restaurant', function (req, res, next) {
 
-        var jsonData = restaurantData;
-        var values = [];
+        let jsonData = restaurantData;
+        let values = [];
 
-        for (var i = 0; i < jsonData.length; i++) {
+        for (let i = 0; i < jsonData.length; i++) {
             values.push([jsonData[i].isValid, jsonData[i].location_id, jsonData[i].latitude, jsonData[i].longitude,
             jsonData[i].address_1, jsonData[i].address_2, jsonData[i].city,
             jsonData[i].province, jsonData[i].country, jsonData[i].postal_code,
@@ -156,21 +151,7 @@ router.get('/update/restaurant', function (req, res) {
                                                                        partner_category = VALUES(partner_category), 
                                                                        partner_type = VALUES(partner_type), fishchoice = VALUES(fishchoice)`;
 
-        db.query(insertOrUpdateQuery, [values], function (err, rows, fields) {
-            if (!err) {
-                console.log('Data are updated or inserted successfully');
-                res.status(200).send('SUCCESS: Data are updated or inserted successfully');
-            } else {
-                console.log('Error while performing INSERT/UPDATE.');
-                res.status(500).send(err);
-            }
-        });
-});
-
-//TODO: ONLY FOR DEBUGGING, REMOVE THIS LATER SINCE IT IS DANGEROUS.
-router.get('/disconnect', function (req, res) {
-    db.end();
-    console.log('Disconnected to database.');
+        return handleInsertOrUpdate(insertOrUpdateQuery, res, values, next);
 });
 
  module.exports = router;

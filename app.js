@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 
-// AUTH CONTROLLER 
+// DEPRECATED!: AUTH CONTROLLER 
 // ===============================================
 app.use('/api/auth', authController);
 

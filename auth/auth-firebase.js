@@ -7,14 +7,16 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount.firebase_admin),
 });
 
-module.exports.authenticate = function authenticate (req, res, next) {
-    if (req.body.idToken == null && req.query.idToken == null) return res.status(400).send('Missing authentication token id.');
+module.exports.authenticate = function authenticate(req, res, next) {
+    if (req.body.idToken == null && req.query.idToken == null) {
+        return next(boom.badRequest('Missing authentication token id.'));
+    }
 
     admin.auth().verifyIdToken(req.body.idToken || req.query.idToken)
-        .then(function(decodedToken) {
+        .then(function (decodedToken) {
             var uid = decodedToken.uid;
             next();
-        }).catch(function(error) {
+        }).catch(function (error) {
             res.status(401).send('Failed to authenticate token.');
         });
 }
