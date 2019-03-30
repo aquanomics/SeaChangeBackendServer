@@ -75,7 +75,7 @@ const auth = require('../../auth/auth-firebase');
         .get('/api/newsarticle')
         .end((err, res) => {
               res.should.have.status(400);
-              expect(res.error.text).to.equal("Parameter category must be specified!");
+              expect(res.body.message).to.equal('Parameter category must be specified!');
           done();
         });
   });
@@ -117,7 +117,7 @@ const auth = require('../../auth/auth-firebase');
         .get('/api/speciesInfo')
         .end((err, res) => {
               res.should.have.status(400);
-              expect(res.error.text).to.equal("Parameter specCode must be specified!");
+              expect(res.body.message).to.equal('Parameter specCode must be specified!');
           done();
         });
   });
