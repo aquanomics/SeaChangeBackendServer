@@ -348,7 +348,7 @@ router.get('/postSearch', auth.authenticate, function (req, res, next) {
 
     for (let i = 0; i < searchWordArr.length; i++) {
         if (i == 0) {
-            sqlQuery += " AND";
+            sqlQuery += " AND (";
         } else {
             sqlQuery += " OR";
         }
@@ -357,7 +357,7 @@ router.get('/postSearch', auth.authenticate, function (req, res, next) {
         sqlQuery += ` OR comment LIKE '%${searchWordArr[i]}%'`;
     }
 
-    sqlQuery += " ORDER BY uploaded_at LIMIT " + limit + " OFFSET " + offset;
+    sqlQuery += ") ORDER BY uploaded_at DESC LIMIT " + limit + " OFFSET " + offset;
 
     db.query(sqlQuery, function (err, rows, fields) {
         if (err) {
