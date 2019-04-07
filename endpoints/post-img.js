@@ -44,7 +44,7 @@ router.post('/image-upload', auth.authenticate, function(req, res, next) {
     }
 
     let latitude = req.query.lat; 
-    let longitude = req.query.long;
+    let longitude = req.query.lng;
 
     if (latitude == 0 && longitude == 0) {
       latitude = null;
