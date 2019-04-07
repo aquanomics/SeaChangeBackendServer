@@ -70,12 +70,13 @@ const auth = require('../../auth/auth-firebase');
         });
   });
 
-  it('should return error status 400 if category is not specified', (done) => {
+  it('should return all news articles if category is not specified', (done) => {
     chai.request(app)
         .get('/api/newsarticle')
         .end((err, res) => {
-              res.should.have.status(400);
-              expect(res.body.message).to.equal('Parameter category must be specified!');
+              res.should.have.status(200);
+              res.body.should.be.a('object');
+              res.body.NewsArticle.should.be.a('array');
           done();
         });
   });

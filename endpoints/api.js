@@ -24,14 +24,16 @@ router.get('/featurecollection', function (req, res, next) {
 
 /* GET News Article */
 router.get('/newsarticle', function (req, res, next) {
-    if (req.query.category === undefined) {
-        return next(boom.badRequest('Parameter category must be specified!'));
-    }
-
     let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
     let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
-    let sqlQuery = "SELECT * FROM ebdb.NewsArticle WHERE category='" + req.query.category + "'" 
-                     + "ORDER BY published_at DESC LIMIT " + limit + " OFFSET " + offset;
+
+    let sqlQuery = `SELECT * FROM ebdb.NewsArticle`; 
+
+    if (req.query.category === undefined || req.query.category === 'All') {
+        sqlQuery += ` ORDER BY published_at DESC LIMIT ` + limit + " OFFSET " + offset;
+    } else {
+        sqlQuery += ` WHERE category='` + req.query.category + "'" + "ORDER BY published_at DESC LIMIT " + limit + " OFFSET " + offset;
+    }
 
     db.query(sqlQuery, function (err, rows, fields) {
         if (err) {
@@ -82,14 +84,18 @@ router.get('/speciesInfo', function (req, res, next) {
 router.get('/listOfSpecies', function (req, res, next) {
     let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
     let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
-    let areaCode = (req.query.areaCode === undefined) ? 67 : req.query.areaCode;
+
     let sqlQuery = `SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
                     FROM ebdb.FaoAreas AS fa
-                    INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode 
-                    WHERE fa.AreaCode = ?` +
-                    " LIMIT " + limit + " OFFSET " + offset;
+                    INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`; 
+   
+    if (req.query.areaCode === undefined || req.query.areaCode === 'All') {
+        sqlQuery += " LIMIT " + limit + " OFFSET " + offset;
+    } else {
+        sqlQuery +=  ` WHERE fa.AreaCode = ?` + " LIMIT " + limit + " OFFSET " + offset;
+    }
 
-    db.query(sqlQuery, [areaCode], function (err, rows, fields) {
+    db.query(sqlQuery, [req.query.areaCode], function (err, rows, fields) {
         if (err) {
             return next(boom.badImplementation(err));
         }
@@ -103,14 +109,15 @@ router.get('/listOfSpecies', function (req, res, next) {
 
 /* GET Events */
 router.get('/events', function (req, res, next) {
-    if (req.query.city === undefined) {
-        return next(boom.badRequest('Parameter city must be specified!'));
-    }
-
     let limit = (req.query.limit == undefined) ? 10 : req.query.limit;
     let offset = (req.query.offset == undefined) ? 0 : req.query.offset;
-    let sqlQuery = 'SELECT * FROM ebdb.Events WHERE city = ? ORDER BY startDate' +
-                   " LIMIT " + limit + " OFFSET " + offset;
+    let sqlQuery = 'SELECT * FROM ebdb.Events'
+
+    if (req.query.city === undefined || req.query.city === 'All') {
+        sqlQuery += ' ORDER BY startDate' + ' LIMIT ' + limit + ' OFFSET ' + offset;
+    } else {
+        sqlQuery += ' WHERE city = ? ORDER BY startDate' + ' LIMIT ' + limit + ' OFFSET ' + offset;
+    }
 
     db.query(sqlQuery, [req.query.city], function (err, rows, fields) {
         if (err) {
