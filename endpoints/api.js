@@ -85,7 +85,7 @@ router.get('/listOfSpecies', function (req, res, next) {
     let limit = (req.query.limit === undefined) ? 10 : req.query.limit;
     let offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
-    let sqlQuery = `SELECT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
+    let sqlQuery = `SELECT DISTINCT sp.SpecCode, sp.Genus, sp.Species, sp.PicPreferredName, sp.FBname 
                     FROM ebdb.FaoAreas AS fa
                     INNER JOIN ebdb.Species AS sp ON fa.SpecCode = sp.SpecCode`; 
    
