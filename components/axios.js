@@ -1,4 +1,4 @@
-// AXIOS FUNCTIONS
+// Axios FUNCTIONS
 // ===============================================
 
 const axios = require('axios');
